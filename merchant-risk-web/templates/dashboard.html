@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Risk Console{% endblock %}
+{% block content %}
+<div class="page">
+
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Merchant Onboarding</p>
+      <h1>Risk Dashboard</h1>
+    </div>
+    <div class="stat-strip">
+      <div class="stat"><span class="stat-num">{{ total }}</span><span class="stat-label">Merchants</span></div>
+      <div class="stat tier-low"><span class="stat-num">{{ counts.LOW }}</span><span class="stat-label">Low</span></div>
+      <div class="stat tier-medium"><span class="stat-num">{{ counts.MEDIUM }}</span><span class="stat-label">Medium</span></div>
+      <div class="stat tier-high"><span class="stat-num">{{ counts.HIGH }}</span><span class="stat-label">High</span></div>
+      <div class="stat tier-alert"><span class="stat-num">{{ alert_count }}</span><span class="stat-label">Flagged</span></div>
+    </div>
+  </div>
+
+  {% if not merchants %}
+  <div class="empty-state">
+    <p class="empty-title">No merchants evaluated yet</p>
+    <p class="empty-sub">Add a merchant profile to run it through the scoring engine.</p>
+    <a href="{{ url_for('add_form') }}" class="btn-primary">+ New Merchant</a>
+  </div>
+  {% else %}
+
+  <div class="merchant-table">
+    <div class="row row-head">
+      <span>Merchant</span>
+      <span>Type</span>
+      <span>Chargeback</span>
+      <span>Refund</span>
+      <span>Alerts</span>
+      <span>Score</span>
+      <span>Tier</span>
+    </div>
+    {% for m in merchants %}
+    <a class="row row-link tier-border-{{ m.riskLevel|lower }}" href="{{ url_for('merchant_detail', mid=m.id) }}">
+      <span class="cell-name">{{ m.name }}</span>
+      <span class="mono muted">{{ m.businessType }}</span>
+      <span class="mono">{{ m.chargebackRatio }}%</span>
+      <span class="mono">{{ m.refundRatio }}%</span>
+      <span class="alert-count {% if m.alerts %}has-alerts{% endif %}">{{ m.alerts|length }}</span>
+      <span class="gauge-wrap">
+        <span class="gauge tier-{{ m.riskLevel|lower }}" style="--pct:{{ m.riskScore }}">
+          <span class="gauge-inner mono">{{ m.riskScore|round(0, 'floor')|int }}</span>
+        </span>
+      </span>
+      <span class="tier-badge tier-badge-{{ m.riskLevel|lower }}">{{ m.riskLevel }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}New Merchant · Risk Console{% endblock %}
+{% block content %}
+<div class="page page-narrow">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Onboarding</p>
+      <h1>New Merchant Profile</h1>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="error-banner">{{ error }}</div>
+  {% endif %}
+
+  <form class="form-card" method="POST" action="{{ url_for('add_submit') }}">
+    <div class="field">
+      <label for="name">Merchant name</label>
+      <input type="text" id="name" name="name" placeholder="e.g. ABC Electronics" value="{{ form_values.name if form_values else '' }}" required>
+    </div>
+
+    <div class="field">
+      <label for="businessType">Business type</label>
+      <select id="businessType" name="businessType" required>
+        <option value="" disabled {% if not form_values %}selected{% endif %}>Select type</option>
+        {% for t in business_types %}
+        <option value="{{ t }}" {% if form_values and form_values.businessType == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field-grid">
+      <div class="field">
+        <label for="businessAge">Business age (months)</label>
+        <input type="number" id="businessAge" name="businessAge" min="0" value="{{ form_values.businessAge if form_values else '' }}" required>
+      </div>
+      <div class="field">
+        <label for="transactions">Monthly transactions</label>
+        <input type="number" id="transactions" name="transactions" min="1" value="{{ form_values.transactions if form_values else '' }}" required>
+      </div>
+      <div class="field">
+        <label for="chargebacks">Chargebacks (count)</label>
+        <input type="number" id="chargebacks" name="chargebacks" min="0" value="{{ form_values.chargebacks if form_values else '' }}" required>
+      </div>
+      <div class="field">
+        <label for="refunds">Refunds (count)</label>
+        <input type="number" id="refunds" name="refunds" min="0" value="{{ form_values.refunds if form_values else '' }}" required>
+      </div>
+      <div class="field">
+        <label for="fraudCases">Fraud cases</label>
+        <input type="number" id="fraudCases" name="fraudCases" min="0" value="{{ form_values.fraudCases if form_values else '' }}" required>
+      </div>
+    </div>
+
+    <p class="form-hint">Chargeback and refund ratios are computed automatically from transactions.</p>
+
+    <button type="submit" class="btn-primary btn-block">Run Risk Assessment</button>
+  </form>
+
+  <p class="api-note">Prefer the API? <code>POST /api/merchants</code> with the same fields as JSON.</p>
+</div>
+{% endblock %}

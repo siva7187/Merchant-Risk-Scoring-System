@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ m.name }} · Risk Console{% endblock %}
+{% block content %}
+<div class="page">
+
+  <a href="{{ url_for('dashboard') }}" class="back-link">&larr; Back to dashboard</a>
+
+  <div class="detail-head tier-border-{{ m.riskLevel|lower }}">
+    <div>
+      <p class="eyebrow">{{ m.businessType }} &middot; {{ m.businessAge }} months in business</p>
+      <h1>{{ m.name }}</h1>
+    </div>
+    <div class="score-block">
+      <span class="gauge gauge-lg tier-{{ m.riskLevel|lower }}" style="--pct:{{ m.riskScore }}">
+        <span class="gauge-inner mono">{{ m.riskScore }}</span>
+      </span>
+      <span class="tier-badge tier-badge-{{ m.riskLevel|lower }}">{{ m.riskLevel }} RISK</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <section class="panel">
+      <h2>Explainability &mdash; Score Breakdown</h2>
+      <div class="factor-table">
+        <div class="factor-row factor-head">
+          <span>Factor</span><span>Risk</span><span>Weight</span><span>Contribution</span>
+        </div>
+        {% for f in m.factors %}
+        <div class="factor-row">
+          <span>{{ f.label }}</span>
+          <span class="mono">{{ f.risk }}</span>
+          <span class="mono muted">{{ (f.weight * 100)|round|int }}%</span>
+          <span class="mono contrib-bar-wrap">
+            <span class="contrib-bar" style="width:{{ (f.contribution / m.riskScore * 100) if m.riskScore else 0 }}%"></span>
+            <span class="contrib-num">{{ f.contribution }}</span>
+          </span>
+        </div>
+        {% endfor %}
+        <div class="factor-row factor-total">
+          <span>Final Score</span><span></span><span></span>
+          <span class="mono">{{ m.riskScore }} &mdash; {{ m.riskLevel }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="panel">
+        <h2>Top Risk Factors</h2>
+        <ol class="ranked-list">
+          {% for tf in m.topFactors %}
+          <li>{{ tf }}</li>
+          {% endfor %}
+        </ol>
+      </section>
+
+      <section class="panel">
+        <h2>Alerts</h2>
+        {% if m.alerts %}
+        <ul class="alert-list">
+          {% for a in m.alerts %}
+          <li>&#9888; {{ a }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No active alerts.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel">
+        <h2>Recommendations</h2>
+        <ul class="rec-list">
+          {% for r in m.recommendations %}
+          <li>&#10003; {{ r }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>Raw Merchant Data</h2>
+    <div class="raw-grid mono">
+      <div><span class="muted">Transactions</span><br>{{ m.transactions }}</div>
+      <div><span class="muted">Chargebacks</span><br>{{ m.chargebacks }} ({{ m.chargebackRatio }}%)</div>
+      <div><span class="muted">Refunds</span><br>{{ m.refunds }} ({{ m.refundRatio }}%)</div>
+      <div><span class="muted">Fraud Cases</span><br>{{ m.fraudCases }}</div>
+      <div><span class="muted">Business Age</span><br>{{ m.businessAge }} months</div>
+      <div><span class="muted">Evaluated</span><br>{{ m.createdAt }}</div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
